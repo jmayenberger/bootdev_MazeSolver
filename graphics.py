@@ -1,5 +1,53 @@
 from tkinter import Tk, BOTH, Canvas
 
+class Cell():
+    def __init__(self, win):
+        self.__win = win
+        self.has_left_wall = True
+        self.has_right_wall = True
+        self.has_top_wall = True
+        self.has_bottom_wall = True
+        self.__x1 = -1
+        self.__x2 = -1
+        self.__y1 = -1
+        self.__y2 = -1
+
+    def change_coordinates(self, length, anchor_point=None, height=None, anchor_x=0, anchor_y=0):
+        if height is None:
+            height = length
+        if anchor_point is None:
+            anchor_point = Point(anchor_x, anchor_y)
+        self.__x1 = anchor_point.x
+        self.__y1 = anchor_point.y
+        self.__x2 = anchor_point.x + length
+        self.__y2 = anchor_point.y + height
+
+    def draw(self):
+        point_top_left = Point(self.__x1, self.__y1)
+        point_bottom_left = Point(self.__x1, self.__y2)
+        point_top_right = Point(self.__x2, self.__y1)
+        point_bottom_right = Point(self.__x2, self.__y2)
+        if self.has_left_wall:
+            self.__win.draw_line(Line(point_top_left, point_bottom_left))
+        if self.has_right_wall:
+            self.__win.draw_line(Line(point_top_right, point_bottom_right))
+        if self.has_top_wall:
+            self.__win.draw_line(Line(point_top_left, point_top_right))
+        if self.has_bottom_wall:
+            self.__win.draw_line(Line(point_bottom_left, point_bottom_right))
+
+    def __repr__(self):
+        string = f"<Cell object> A=({self.__x1}, {self.__y1}) B=({self.__x2}, {self.__y2}) "
+        if self.has_left_wall:
+            string += "has_left_wall "
+        if self.has_bottom_wall:
+            string += "has_bottom_wall "
+        if self.has_right_wall:
+            string += "has_right_wall "
+        if self.has_top_wall:
+            string += "has_top_wall "
+        return string
+
 class Window():
     def __init__(self, width, height):
         self.__root = Tk()
