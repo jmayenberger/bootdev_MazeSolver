@@ -11,6 +11,8 @@ class Cell():
         self.__x2 = -1
         self.__y1 = -1
         self.__y2 = -1
+        self.__p1 = Point(self.__x1, self.__y1)
+        self.__p2 = Point(self.__x2, self.__y2)
 
     def change_coordinates(self, length, anchor_point=None, height=None, anchor_x=0, anchor_y=0):
         if height is None:
@@ -21,6 +23,8 @@ class Cell():
         self.__y1 = anchor_point.y
         self.__x2 = anchor_point.x + length
         self.__y2 = anchor_point.y + height
+        self.__p1 = anchor_point
+        self.__p2 = Point(self.__x2, self.__y2)
 
     def draw(self):
         point_top_left = Point(self.__x1, self.__y1)
@@ -35,6 +39,15 @@ class Cell():
             self.__win.draw_line(Line(point_top_left, point_top_right))
         if self.has_bottom_wall:
             self.__win.draw_line(Line(point_bottom_left, point_bottom_right))
+
+    def draw_move(self, to_cell, undo=False):
+        temp_self = Line(self.__p1, self.__p2)
+        temp_other = Line(to_cell.__p1, to_cell.__p2)
+        connect_line = Line(temp_self.middle(), temp_other.middle())
+        if undo:
+            self.__win.draw_line(connect_line, "grey")
+        else:
+            self.__win.draw_line(connect_line, "red")
 
     def __repr__(self):
         string = f"<Cell object> A=({self.__x1}, {self.__y1}) B=({self.__x2}, {self.__y2}) "
@@ -86,4 +99,7 @@ class Line():
     def draw(self, canvas, fill_color="black"):
         canvas.create_line(self.__p1.x, self.__p1.y, self.__p2.x, self.__p2.y, fill=fill_color, width=2)
 
-
+    def middle(self):
+        x = abs(self.__p1.x + self.__p2.x) / 2
+        y = abs(self.__p1.y + self.__p2.y) / 2
+        return Point(x, y)
