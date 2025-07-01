@@ -1,4 +1,49 @@
+import time
 from tkinter import Tk, BOTH, Canvas
+from const import SLEEP_TIME
+
+
+class Maze():
+    def __init__(
+        self,
+        x1,
+        y1,
+        num_rows,
+        num_cols,
+        cell_size_x,
+        cell_size_y,
+        win,
+    ):
+        self.__x1 = x1
+        self.__y1 = y1
+        self.__num_rows = num_rows
+        self.__num_cols = num_cols
+        self.__cell_size_x = cell_size_x
+        self.__cell_size_y = cell_size_y
+        self.__win = win
+        self.__cells = []
+        self.__create_cells()
+    
+    def __create_cells(self):
+        for i in range(self.__num_cols):
+            column = []
+            for j in range(self.__num_rows):
+                newCell = Cell(self.__win)
+                newCell.change_coordinates(
+                    length=self.__cell_size_x,
+                    height= self.__cell_size_y,
+                    anchor_x=self.__x1 + i * self.__cell_size_x,
+                    anchor_y=self.__y1 + j * self.__cell_size_y)
+                newCell.draw()
+                self.__animate()
+                column.append(newCell)
+            self.__cells.append(column)
+
+    def __animate(self):
+        self.__win.redraw()
+        time.sleep(SLEEP_TIME)
+        
+
 
 class Cell():
     def __init__(self, win):
