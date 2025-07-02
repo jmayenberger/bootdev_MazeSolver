@@ -105,7 +105,17 @@ class Tests(unittest.TestCase):
                 )
         print("Maze create_cells creates correct cell coordinates")
 
-    #def test_
+    def test_maze_break_entrance_and_exit(self):
+        x1 = 20
+        y1 = 87
+        num_cols = 8
+        num_rows = 15
+        cell_size_x = 7
+        cell_size_y = 17
+        m1 = Maze(x1, y1, num_rows, num_cols, cell_size_x, cell_size_y)
+        self.assertEqual(m1._Maze__cells[0][0].has_left_wall, False) # type: ignore
+        self.assertEqual(m1._Maze__cells[m1._Maze__num_cols - 1][m1._Maze__num_rows - 1].has_right_wall, False) # type: ignore
+        print("Maze break_entrance_and_exit works as intended")
 
 if __name__ == "__main__":
     unittest.main()

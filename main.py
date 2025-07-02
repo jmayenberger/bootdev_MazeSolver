@@ -7,8 +7,8 @@ def main():
     
     x1 = 10
     y1 = 10
-    num_rows = 20
-    num_cols = 30
+    num_rows = 5
+    num_cols = 7
     cell_size_x = (width - 2 * x1) / num_cols
     cell_size_y = (height - 2 * y1) / num_rows
     maze = Maze(

@@ -1,6 +1,7 @@
 import time
+import random
 from tkinter import Tk, BOTH, Canvas
-from const import SLEEP_TIME, DRAW_COLOR, UNDO_COLOR
+from const import SLEEP_TIME, DRAW_COLOR, UNDO_COLOR, WALL_COLOR, BG_COLOR
 
 
 class Maze():
@@ -13,7 +14,9 @@ class Maze():
         cell_size_x,
         cell_size_y,
         win=None,
+        seed=None,
     ):
+        random.seed(seed)
         self.__x1 = x1
         self.__y1 = y1
         self.__num_rows = num_rows
@@ -23,6 +26,8 @@ class Maze():
         self.__win = win
         self.__cells = []
         self.__create_cells()
+        self.__break_entrance_and_exit()
+        self.__break_walls_r(0, 0)
     
     def __create_cells(self):
         for i in range(self.__num_cols):
@@ -39,6 +44,51 @@ class Maze():
                 column.append(newCell)
             self.__cells.append(column)
 
+    def __break_entrance_and_exit(self):
+        self.__cells[0][0].has_left_wall = False
+        self.__cells[0][0].draw()
+        self.__cells[-1][-1].has_right_wall = False
+        self.__cells[-1][-1].draw()
+
+    def __break_walls_r(self, i, j):
+        self.__cells[i][j].visited = True
+        while True:
+            possible_directions = []
+            if i < self.__num_cols - 1 and not self.__cells[i + 1][j].visited:
+                possible_directions.append("right")
+            if i > 0 and not self.__cells[i - 1][j].visited:
+                possible_directions.append("left")
+            if j < self.__num_rows - 1 and not self.__cells[i][j + 1].visited:
+                possible_directions.append("bottom")
+            if j > 0 and not self.__cells[i][j - 1].visited:
+                possible_directions.append("top")
+            
+            if len(possible_directions) == 0:
+                self.__cells[i][j].draw()
+                return
+
+            direction = possible_directions[random.randrange(len(possible_directions))]
+            match direction:
+                case "left":
+                    self.__cells[i][j].has_left_wall = False
+                    self.__cells[i - 1][j].has_right_wall = False
+                    self.__break_walls_r(i - 1, j)
+                case "right":
+                    self.__cells[i][j].has_right_wall = False
+                    self.__cells[i + 1][j].has_left_wall = False
+                    self.__break_walls_r(i + 1, j)
+                case "top":
+                    self.__cells[i][j].has_top_wall = False
+                    self.__cells[i][j - 1].has_bottom_wall = False
+                    self.__break_walls_r(i, j - 1)
+                case "bottom":
+                    self.__cells[i][j].has_bottom_wall = False
+                    self.__cells[i][j + 1].has_top_wall = False
+                    self.__break_walls_r(i, j + 1)
+
+            
+
+
     def __animate(self):
         if self.__win is None:
             return
@@ -52,6 +102,7 @@ class Cell():
         self.has_right_wall = True
         self.has_top_wall = True
         self.has_bottom_wall = True
+        self.visited = False
         self.__x1 = -1
         self.__x2 = -1
         self.__y1 = -1
@@ -77,30 +128,38 @@ class Cell():
         point_top_right = Point(self.__x2, self.__y1)
         point_bottom_right = self.__p2
         lines = []
+
+        line = Line(point_top_left, point_bottom_left)
+        color = BG_COLOR
         if self.has_left_wall:
-            line = Line(point_top_left, point_bottom_left)
-            if self.__win is None:
-                lines.append(line)
-            else:
-                self.__win.draw_line(line)
+            color = WALL_COLOR
+            lines.append(line)
+        if self.__win is not None:
+            self.__win.draw_line(line, color)
+
+        line = Line(point_bottom_left, point_bottom_right)
+        color = BG_COLOR
         if self.has_bottom_wall:
-            line = Line(point_bottom_left, point_bottom_right)
-            if self.__win is None:
-                lines.append(line)
-            else:
-                self.__win.draw_line(line)
+            color = WALL_COLOR
+            lines.append(line)
+        if self.__win is not None:
+            self.__win.draw_line(line, color)
+    
+        line = Line(point_bottom_right, point_top_right)
+        color = BG_COLOR
         if self.has_right_wall:
-            line = Line(point_top_right, point_bottom_right)
-            if self.__win is None:
-                lines.append(line)
-            else:
-                self.__win.draw_line(line)
+            color = WALL_COLOR
+            lines.append(line)
+        if self.__win is not None:
+            self.__win.draw_line(line, color)
+
+        line = Line(point_top_right, point_top_left)
+        color = BG_COLOR
         if self.has_top_wall:
-            line = Line(point_top_left, point_top_right)
-            if self.__win is None:
-                lines.append(line)
-            else:
-                self.__win.draw_line(line)
+            color = WALL_COLOR
+            lines.append(line)
+        if self.__win is not None:
+            self.__win.draw_line(line, color)
         
         return lines
 
@@ -115,7 +174,7 @@ class Cell():
                 self.__win.draw_line(connect_line, UNDO_COLOR)
         else:
             if self.__win is None:
-                return (connect_line, UNDO_COLOR)
+                return (connect_line, DRAW_COLOR)
             else:
                 self.__win.draw_line(connect_line, DRAW_COLOR)
 
@@ -156,7 +215,7 @@ class Window():
     def close(self):
         self.__running = False
 
-    def draw_line(self, line, fill_color="black"):
+    def draw_line(self, line, fill_color=WALL_COLOR):
         line.draw(self.__canvas, fill_color)
 
 class Point():
@@ -190,7 +249,7 @@ class Line():
         self.__p1 = p1
         self.__p2 = p2
     
-    def draw(self, canvas, fill_color="black"):
+    def draw(self, canvas, fill_color=WALL_COLOR):
         canvas.create_line(self.__p1.x, self.__p1.y, self.__p2.x, self.__p2.y, fill=fill_color, width=2)
 
     def middle(self):
