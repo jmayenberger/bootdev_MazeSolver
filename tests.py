@@ -117,5 +117,22 @@ class Tests(unittest.TestCase):
         self.assertEqual(m1._Maze__cells[m1._Maze__num_cols - 1][m1._Maze__num_rows - 1].has_right_wall, False) # type: ignore
         print("Maze break_entrance_and_exit works as intended")
 
+    def test_maze_reset_cells_visited(self):
+        x1 = 5
+        y1 = 100
+        num_cols = 23
+        num_rows = 6
+        cell_size_x = 76
+        cell_size_y = 64
+        m1 = Maze(x1, y1, num_rows, num_cols, cell_size_x, cell_size_y)
+        m1._Maze__cells[0][0].visited = True # type: ignore
+        m1._Maze__cells[-1][-1].visited = True # type: ignore
+        m1._Maze__reset_cells_visited() # type: ignore
+        for i in range(num_cols):
+            for j in range(num_rows):
+                self.assertEqual(m1._Maze__cells[i][j].visited, False) # type: ignore
+        print("Maze reset_cells_visited works as intended")
+
+
 if __name__ == "__main__":
     unittest.main()
