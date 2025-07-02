@@ -41,7 +41,7 @@ class Maze():
                     anchor_x=self.__x1 + i * self.__cell_size_x,
                     anchor_y=self.__y1 + j * self.__cell_size_y)
                 newCell.draw()
-                self.__animate()
+                self.__animate(SLEEP_TIME / 10)
                 column.append(newCell)
             self.__cells.append(column)
 
@@ -92,11 +92,51 @@ class Maze():
             for cell in col:
                 cell.visited = False
 
-    def __animate(self):
+    def solve(self):
+        return self.__solve_r(0, 0)
+    
+    def __solve_r(self, i, j):
+        self.__animate()
+        current_cell = self.__cells[i][j]
+        current_cell.visited = True
+
+        if i == self.__num_cols - 1 and j == self.__num_rows - 1:
+            return True
+        
+        possible_directions = []
+        if i < self.__num_cols - 1 and not self.__cells[i + 1][j].visited and not current_cell.has_right_wall:
+            possible_directions.append("right")
+        if j > 0 and not self.__cells[i][j - 1].visited and not current_cell.has_top_wall:
+            possible_directions.append("top")
+        if i > 0 and not self.__cells[i - 1][j].visited and not current_cell.has_left_wall:
+            possible_directions.append("left")
+        if j < self.__num_rows - 1 and not self.__cells[i][j + 1].visited and not current_cell.has_bottom_wall:
+            possible_directions.append("bottom")
+
+        for direction in possible_directions:
+            match direction:
+                case "left":
+                    next_index = (i - 1, j)
+                case "top":
+                    next_index = (i, j - 1)
+                case "right":
+                    next_index = (i + 1, j)
+                case "bottom":
+                    next_index = (i, j + 1)
+            next_cell = self.__cells[next_index[0]][next_index[1]]
+            current_cell.draw_move(next_cell)
+            if self.__solve_r(*next_index):
+                return True
+            else:
+                current_cell.draw_move(next_cell, undo=True)
+        
+        return False
+
+    def __animate(self, sleep=SLEEP_TIME):
         if self.__win is None:
             return
         self.__win.redraw()
-        time.sleep(SLEEP_TIME)
+        time.sleep(sleep)
 
 class Cell():
     def __init__(self, win=None):

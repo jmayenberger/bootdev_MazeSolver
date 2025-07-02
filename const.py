@@ -1,4 +1,6 @@
-SLEEP_TIME = .05
+SLEEP_TIME = .1
+AWAIT = 2
+RECURSION_LIMIT = 1e4
 DRAW_COLOR = "red"
 UNDO_COLOR = "grey"
 WALL_COLOR = "black"
